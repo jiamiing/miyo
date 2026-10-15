@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Two people, two panes, live typing over an encrypted WebRTC data channel.",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
@@ -18,5 +20,12 @@
     "@capacitor/core": "^8.0.0",
     "@capacitor/ios": "^8.0.0"
   },
-  "devDependencies": { "@capacitor/cli": "^8.0.0" }
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  },
+  "overrides": {
+    "xcode": {
+      "uuid": "11.1.1"
+    }
+  }
 }
