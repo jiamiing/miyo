@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f5f3ef">
   <meta name="description" content="两个人的实时打字空间。上面是你，下面是我。没有发送键。">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>密友 Miyo · 字里，见面</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
@@ -18,7 +18,7 @@
       <div class="top-actions"><span class="status-pill" id="status"><i></i><span id="status-label">还未连接</span></span><button class="icon-button" id="help-button" aria-label="关于密友">?</button></div>
     </header>
     <main>
-      <section class="intro"><div><span class="eyebrow">A LITTLE CLOSER, LETTER BY LETTER</span><h1>字里，见面<span class="title-dot">。</span></h1><p><span>上面是你，下面是我。</span><span>想到哪里，就写到哪里。</span></p></div><button class="primary" id="connect-button">连接一位密友 <span aria-hidden="true">↗</span></button></section>
+      <section class="intro"><div><span class="eyebrow">A LITTLE CLOSER, LETTER BY LETTER</span><h1>字里，见面<span class="title-dot">。</span></h1><p><span>上面是你，下面是我。</span><span>想到哪里，就写到哪里。</span></p></div><button class="primary" id="connect-button">邀请密友 <span aria-hidden="true">↗</span></button></section>
       <section class="conversation" aria-label="实时打字分屏">
         <article class="pane peer-pane">
           <div class="pane-header"><div class="person"><span class="avatar peer-avatar" aria-hidden="true">你</span><div><h2 id="peer-name">你的密友</h2><span class="person-status" id="peer-status">等一个人，来这里</span></div></div><span class="pane-caption">TA 的字</span></div>
@@ -37,21 +37,38 @@
   </div>
   <dialog id="connection-dialog" aria-labelledby="dialog-title">
     <div class="dialog-head"><div><span class="eyebrow">JUST THE TWO OF US</span><h2 id="dialog-title">在这里，碰个面。</h2></div><button class="icon-button" id="close-dialog" aria-label="关闭连接窗口">×</button></div>
-    <p class="dialog-subtitle">先交换连接码，再一起开始打字。</p>
-    <label class="field-label" for="nickname">怎么称呼你</label><input id="nickname" maxlength="24" placeholder="给密友看的名字" value="我">
-    <div class="tabs" role="tablist" aria-label="连接方式"><button id="host-tab" role="tab" aria-selected="true" aria-controls="host-panel">我来发起</button><button id="join-tab" role="tab" aria-selected="false" aria-controls="join-panel">我来加入</button></div>
-    <div id="host-panel" role="tabpanel" aria-labelledby="host-tab">
-      <label class="check-row"><input type="checkbox" id="strict-mode"><span>严格无服务器 <small>关闭 STUN，适合同一局域网；仍可能受网络隔离限制</small></span></label>
-      <p class="micro" id="network-note">默认借助公共 STUN 寻找直连地址，不传输聊天内容。没有 TURN 中继，部分网络可能连接失败。</p>
-      <button class="primary wide" id="create-button">生成邀请连接码</button>
-      <div id="host-codes" hidden><label class="field-label" for="invite-output">01 · 把邀请连接码交给密友</label><textarea id="invite-output" class="code-field" readonly aria-label="邀请连接码"></textarea><button class="secondary wide" id="copy-invite">复制邀请连接码</button><label class="field-label" for="answer-input">03 · 粘贴密友给你的回应码</label><textarea id="answer-input" class="code-field" placeholder="MIYO1.…" spellcheck="false"></textarea><button class="primary wide" id="accept-button">完成连接</button></div>
+    <p class="dialog-subtitle" id="connection-subtitle">发一个链接，对方点开就能加入。</p>
+    <div id="quick-start">
+      <button class="primary wide invite-main" id="quick-create">邀请密友 <span aria-hidden="true">↗</span></button>
+      <button class="secondary wide" id="paste-link">我收到了邀请链接</button>
+      <div id="quick-paste" hidden><label class="field-label" for="quick-input">粘贴密友发给你的链接</label><input id="quick-input" type="url" placeholder="https://jiamiing.github.io/miyo/#j=…"><button class="primary wide" id="quick-import">打开邀请</button></div>
+      <p class="micro centered">不必注册，也不用填写名字。</p>
     </div>
-    <div id="join-panel" role="tabpanel" aria-labelledby="join-tab" hidden><label class="field-label" for="invite-input">01 · 粘贴密友给你的邀请连接码</label><textarea id="invite-input" class="code-field" placeholder="MIYO1.…" spellcheck="false"></textarea><button class="primary wide" id="join-button">生成回应码</button><div id="join-codes" hidden><label class="field-label" for="answer-output">02 · 把回应码交还给密友</label><textarea id="answer-output" class="code-field" readonly aria-label="回应码"></textarea><button class="secondary wide" id="copy-answer">复制回应码</button><p class="micro">等密友粘贴回应码后，两边会出现相同的核对码。</p></div></div>
+    <div id="quick-waiting" hidden>
+      <div class="invitation-card"><span class="invitation-icon" aria-hidden="true">↗</span><h3>邀请已经准备好</h3><p>把链接发给 TA，然后留在这个页面。</p><span class="invite-address">jiamiing.github.io/miyo</span></div>
+      <button class="primary wide" id="share-quick">分享邀请链接</button><button class="secondary wide" id="copy-quick">复制链接</button>
+      <input id="quick-output" class="share-output" readonly aria-label="邀请链接" hidden>
+      <p class="micro centered">对方加入后自动连接，无需发回任何码。<br>链接 10 分钟内有效，拿到链接的人可以加入，请只发给密友。</p>
+    </div>
+    <div id="quick-incoming" hidden><div class="invitation-card"><span class="invitation-icon" aria-hidden="true">♡</span><h3>密友在等你</h3><p>加入后，你们就能看见彼此打下的字。</p></div><button class="primary wide invite-main" id="quick-join">加入，开始见面</button><p class="micro centered">只加入你认识的人发来的邀请。</p></div>
+    <div id="quick-progress" hidden><div class="invitation-card"><span class="connecting-orbit" aria-hidden="true">↔</span><h3>正在和 TA 连接</h3><p>自动确认邀请，通常只需要几秒。<br>不用再复制或输入任何码。</p></div></div>
+    <div id="quick-connected" hidden><div class="invitation-card"><span class="invitation-icon" aria-hidden="true">✓</span><h3>你们已经连接</h3><p>邀请已验证，文字正在两台设备之间加密传输。</p></div><button class="primary wide" id="back-to-chat">继续打字</button></div>
+    <div class="quick-settings"><label for="nickname">你的名字（可不填）</label><input id="nickname" maxlength="24" placeholder="我" value=""></div>
+    <details id="manual-options"><summary>备用连接方式 · 不使用信令服务</summary>
+      <p class="micro">仅在自动连接不可用时使用。需要互发两条压缩链接，仍不需要自己买服务器。</p>
+      <div class="tabs" role="tablist" aria-label="备用连接方式"><button id="host-tab" role="tab" aria-selected="true" aria-controls="host-panel">我来发起</button><button id="join-tab" role="tab" aria-selected="false" aria-controls="join-panel">我来加入</button></div>
+      <div id="host-panel" role="tabpanel" aria-labelledby="host-tab">
+        <label class="check-row"><input type="checkbox" id="strict-mode"><span>完全关闭辅助服务 <small>仅尝试设备可直接访问的网络，可能无法连接</small></span></label>
+        <button class="secondary wide" id="create-button">创建备用邀请链接</button>
+        <div id="host-codes" hidden><label class="field-label" for="invite-output">把邀请链接交给密友</label><textarea id="invite-output" class="code-field" readonly aria-label="备用邀请链接"></textarea><button class="secondary wide" id="copy-invite">复制备用邀请链接</button><label class="field-label" for="answer-input">粘贴对方发回的确认链接</label><textarea id="answer-input" class="code-field" placeholder="粘贴确认链接" spellcheck="false"></textarea><button class="primary wide" id="accept-button">连接</button></div>
+      </div>
+      <div id="join-panel" role="tabpanel" aria-labelledby="join-tab" hidden><label class="field-label" for="invite-input">密友的备用邀请链接</label><textarea id="invite-input" class="code-field" placeholder="粘贴备用邀请链接" spellcheck="false"></textarea><button class="secondary wide" id="join-button">生成确认链接</button><div id="join-codes" hidden><label class="field-label" for="answer-output">把确认链接交还给密友</label><textarea id="answer-output" class="code-field" readonly aria-label="备用确认链接"></textarea><button class="secondary wide" id="copy-answer">复制确认链接</button><p class="micro">等密友打开或粘贴确认链接后，再核对安全码。</p></div></div>
+    </details>
     <div id="verify-panel" hidden><div class="verify-box"><span class="eyebrow">确认你连接的是 TA</span><strong id="safety-code"></strong><p>通过当面或可信通话，核对两边的码完全相同。双方确认前不会共享文字。</p></div><button class="primary wide" id="verify-button">码一致，开始交流</button><button class="text-button wide" id="reject-button">码不一致，断开连接</button></div>
     <p id="dialog-status" class="dialog-status" role="status" aria-live="polite"></p>
-    <p class="dialog-footnote">连接码包含临时网络地址，请只交给你的密友。每次连接都要重新交换。</p>
+    <p class="dialog-footnote">自动连接使用免费的 PeerJS 公共服务协助配对，建立连接后离开该服务；聊天正文不经过信令服务。无需购买服务器。</p>
   </dialog>
-  <dialog id="help-dialog" aria-labelledby="help-title"><div class="dialog-head"><h2 id="help-title">就像坐在同一张纸前。</h2><button class="icon-button" id="close-help" aria-label="关闭说明">×</button></div><div class="help-copy"><p>你写字、删字、换行，对方都会实时看见。不需要发送，也没有聊天气泡。</p><h3>只有你们两个人</h3><p>文字通过 WebRTC 加密通道传输。双方核对安全码后才开放输入。不上传聊天记录，不使用分析追踪，也不把文字存进本地数据库。</p><h3>连接需要一点配合</h3><p>用已有的可信方式交换邀请和回应码。默认使用公共 STUN 辅助直连；严格模式关闭 STUN。没有中继服务器，某些移动网络、公司网络可能无法连接。</p><h3>离开，就暂时告别</h3><p>两人需要同时在线。锁屏、切到后台、刷新或关闭页面可能断线，重新连接需要新连接码。结束连接会清空当前页面的文字，但无法阻止对方截图或复制。</p><p class="micro">输入法是否逐字暴露候选内容，取决于系统。网页会同步系统提供的输入和组合事件，无法读取键盘内部候选词。</p></div></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title"><div class="dialog-head"><h2 id="help-title">就像坐在同一张纸前。</h2><button class="icon-button" id="close-help" aria-label="关闭说明">×</button></div><div class="help-copy"><p>你写字、删字、换行，对方都会实时看见。不需要发送，也没有聊天气泡。</p><h3>只有你们两个人</h3><p>文字通过 WebRTC 加密通道传输。自动模式验证邀请密钥后才开放输入，备用模式仍需双方核对安全码。不上传聊天记录，不使用分析追踪，也不把文字存进本地数据库。</p><h3>连接需要一点配合</h3><p>点「邀请密友」分享一条短链接，对方打开并加入，即可自动连接。默认使用免费的 PeerJS 公共服务交换连接信息，邀请密钥用于验证双方证书，随后关闭信令连接。文字不经过信令服务。备用方式可完全不使用信令服务。没有 TURN 中继，某些移动网络、公司网络可能无法连接。</p><h3>离开，就暂时告别</h3><p>两人需要同时在线。锁屏、切到后台、刷新或关闭页面可能断线，重新连接需要新的邀请链接。结束连接会清空当前页面的文字，但无法阻止对方截图或复制。</p><p class="micro">输入法是否逐字暴露候选内容，取决于系统。网页会同步系统提供的输入和组合事件，无法读取键盘内部候选词。</p></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <script type="module" src="./src/app.js"></script>
 </body>

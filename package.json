@@ -1,6 +1,6 @@
 {
   "name": "miyo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Two people, two panes, live typing over an encrypted WebRTC data channel.",
@@ -18,7 +18,8 @@
   "dependencies": {
     "@capacitor/android": "^8.0.0",
     "@capacitor/core": "^8.0.0",
-    "@capacitor/ios": "^8.0.0"
+    "@capacitor/ios": "^8.0.0",
+    "peerjs": "1.5.5"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0"

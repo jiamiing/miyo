@@ -2,7 +2,7 @@ name: Native builds
 on:
   push:
     branches: [main]
-    paths: ['src/**', 'index.html', 'styles.css', 'icon.svg', 'ios/**', 'android/**', 'package*.json', 'capacitor.config.json', '.github/workflows/native.yml']
+    paths: ['src/**', 'vendor/**', 'index.html', 'styles.css', 'icon.svg', 'ios/**', 'android/**', 'package*.json', 'capacitor.config.json', '.github/workflows/native.yml']
   workflow_dispatch:
 permissions:
   contents: read

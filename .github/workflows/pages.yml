@@ -8,6 +8,7 @@ on:
       - 'styles.css'
       - 'icon.svg'
       - 'src/**'
+      - 'vendor/**'
       - 'tests/**'
       - 'scripts/build.mjs'
       - 'package.json'

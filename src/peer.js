@@ -6,6 +6,7 @@ const HIGH_WATER = 64000;
 export class MiyoPeer extends EventTarget {
   constructor() { super(); this.generation = 0; this.resetState(); }
   resetState() {
+    this.authenticatedInvite = false;
     this.localVerified = false; this.remoteVerified = false; this.ready = false;
     this.seq = 0; this.remoteSeq = -1; this.pending = null; this.lastSeen = 0;
   }
@@ -34,6 +35,18 @@ export class MiyoPeer extends EventTarget {
     await this.gather(pc);
     this.assertCurrent(pc);
     return encodeSignal({ ...pc.localDescription.toJSON(), session: this.session, strict });
+  }
+  adopt(channel, connection, session, name) {
+    this.close();
+    this.pc = connection; this.session = session; this.strict = false;
+    this.name = name.trim().slice(0, 24) || '密友';
+    this.authenticatedInvite = true;
+    const generation = this.generation;
+    connection.addEventListener('connectionstatechange', () => {
+      if (generation === this.generation && ['failed', 'disconnected', 'closed'].includes(connection.connectionState)) this.fail('连接中断了，请重新分享邀请链接。');
+    });
+    this.attach(channel);
+    queueMicrotask(() => { if (generation === this.generation) channel.onopen?.(); });
   }
   async join(code, name) {
     const signal = decodeSignal(code, 'offer');
@@ -77,8 +90,9 @@ export class MiyoPeer extends EventTarget {
         if (generation !== this.generation) return;
         this.lastSeen = Date.now();
         this.send('hello', { name: this.name });
-        this.emit('verify', { code });
         this.emit('state', { state: 'verifying' });
+        if (this.authenticatedInvite) this.verify();
+        else this.emit('verify', { code });
         this.heartbeat = setInterval(() => {
           if (Date.now() - this.lastSeen > 35000) { this.fail('密友暂时离线了。请保持应用在前台，再重新连接。'); return; }
           this.send('ping', { time: Date.now() });
