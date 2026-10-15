@@ -1,0 +1,8 @@
+{
+  "appId": "app.miyo.chat",
+  "appName": "密友 Miyo",
+  "webDir": "dist",
+  "backgroundColor": "#f5f3ef",
+  "ios": { "contentInset": "never", "preferredContentMode": "mobile" },
+  "android": { "backgroundColor": "#f5f3ef" }
+}
