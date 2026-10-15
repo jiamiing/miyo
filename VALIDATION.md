@@ -13,6 +13,9 @@
 - 双向同步中文、emoji 和多行文本；编辑替换与清空可同步。
 - 刷新一端后另一端显示断开，并清空会话文字。
 - 在宽 390、高 844 的 iframe 中验证窄屏布局，实际 `innerWidth` 与 `scrollWidth` 均为 390，无横向溢出；这不等同于手机 WebView 真机测试。
+- 默认 STUN 模式也在两个页面中成功交换连接码、核对安全码并同步文字；不代表跨设备或跨网络验证。
+- GitHub Actions 网页检查通过，`npm audit` 为 0 个已知漏洞；开发工具 xcode 的 uuid 间接依赖已固定为修复版本。
+- [原生云构建](https://github.com/jiamiing/miyo/actions/runs/38710283722)成功：Android `assembleDebug` 产出调试 APK（作业 2 分 34 秒），iOS `xcodebuild` 产出未签名模拟器 App（作业 48 秒）。不是 iPhone 真机 IPA。
 
 ## 待真实设备验证
 
